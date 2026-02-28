@@ -1,0 +1,26 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="click" />
+          <option value="rich" />
+          <option value="python-dotenv" />
+          <option value="requests" />
+          <option value="pydantic" />
+          <option value="structlog" />
+          <option value="pyyaml" />
+          <option value="typing-extensions" />
+          <option value="tqdm" />
+          <option value="pytest" />
+          <option value="pytest-cov" />
+          <option value="ruff" />
+          <option value="black" />
+          <option value="pre-commit" />
+          <option value="ipython" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
