@@ -1,94 +1,58 @@
 import cv2
 import numpy as np
 from rembg import remove
-from PIL import Image
-
-img = cv2.imread("./foots/1/IMG_0315.jpg")
-img = cv2.resize(img, (img.shape[1] // 5, img.shape[0] // 5))
 
 
-def draw_grid(image, cell_size=50, color=(0, 255, 0), thickness=1):
-    """
-    Рисует сетку на изображении
-    """
-    img_copy = image.copy()
-    h, w = img_copy.shape[:2]
-    # Рисуем вертикальные линии
-    for x in range(0, w, cell_size):
-        cv2.line(img_copy, (x, 0), (x, h), color, thickness)
-    # Рисуем горизонтальные линии
-    for y in range(0, h, cell_size):
-        cv2.line(img_copy, (0, y), (w, y), color, thickness)
-    return img_copy
+def resize_with_padding(image, target_size=(512, 512)):
+    h, w = image.shape[:2]
+    tw, th = target_size
+
+    # Вычисляем коэффициент масштабирования
+    scale = min(tw / w, th / h)
+    new_w, new_h = int(w * scale), int(h * scale)
+
+    resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+    if len(image.shape) == 2:
+        final_image = np.zeros((th, tw), dtype=np.uint8)
+    else:
+        final_image = np.zeros((th, tw, 3), dtype=np.uint8)
+
+    dx = (tw - new_w) // 2
+    dy = (th - new_h) // 2
+    final_image[dy:dy + new_h, dx:dx + new_w] = resized
+
+    return final_image
 
 
-img = draw_grid(img, cell_size=25, color=(40, 40, 40), thickness=1)
-# cv2.imshow("Result", img)
+def get_clean_foot_step(image_path, target_size=(512, 512)):
+    src = cv2.imread(image_path)
 
-# ВОПРОС: тут надо подавать изображение с параметрами или можно просто подать изображение и уже из него извлечь данные
-# или тут надо чтобы исходное изображение подгонялось под определенный размер
+    # Удаление фона (получаем RGBA)
+    no_bg_rgba = remove(src)
 
+    # Извлечение маски и цветного изображения
+    mask = no_bg_rgba[:, :, 3]
+    foot_color = no_bg_rgba[:, :, :3]
 
-# В ТЕСТЕ
-# ===============================================================================
-def create_grayscale_on_black(image_path):
-    # 1. Загружаем исходное цветное изображение
-    image = cv2.imread(image_path)
-    if image is None:
-        print(f"Ошибка: Не удалось загрузить изображение по пути {image_path}")
-        return None
+    gray_foot = cv2.cvtColor(foot_color, cv2.COLOR_BGR2GRAY)
 
-    # 2. Создаем маску для выделения стопы
-    # Переводим в Grayscale для упрощения поиска маски
-    gray_mask = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Очистка маски (Морфология)
+    kernel = np.ones((5, 5), np.uint8)
+    refined_mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
-    # Используем threshold Оцу, чтобы автоматически найти порог
-    # Это работает, если фон темный, а стопа яркая
-    ret, mask = cv2.threshold(gray_mask, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    final_gray = resize_with_padding(gray_foot, target_size)
+    final_mask = resize_with_padding(refined_mask, target_size)
 
-    # 3. Накладываем маску на исходное цветное изображение
-    # В результате получим цветную стопу на черном фоне
-    # Сетка сохранится, так как она часть объекта
-    color_on_black = cv2.bitwise_and(image, image, mask=mask)
+    return final_gray, final_mask
 
-    # 4. Преобразуем результат в оттенки серого
-    # Получаем финальный серый объект на черном фоне
-    result_grayscale = cv2.cvtColor(color_on_black, cv2.COLOR_BGR2GRAY)
+if __name__ == "__main__":
+    path = "./foots/1/IMG_0315.jpg"
 
-    return result_grayscale
+    gray, mask = get_clean_foot_step(path)
 
-
-# Путь к вашему цветному изображению
-input_path = "./foots/1/IMG_0315.jpg"
-# Обработка
-result = create_grayscale_on_black(input_path)
-result = cv2.resize(result, (img.shape[1] // 5, img.shape[0] // 5))
-cv2.imshow("Result (Grayscale on Black)", result)
-# =============================================================================
-
-def draw_contour(image, width, height, channels):
-    """
-    Данная функция: удаляет фон, преобразовывает в оттенки серого
-    """
-    # Проверяем размеры
-    if image.shape[1] != width or image.shape[0] != height:
-        image = cv2.resize(image, (width, height))
-    # Конвртируем в RGB для PIL
-    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    img_pil = Image.fromarray(img_rgb)
-    # Удаляем фон
-    img_no_bg = remove(img_pil)
-    img_no_bg_cv = cv2.cvtColor(np.array(img_no_bg), cv2.COLOR_RGB2BGR)
-    # Перевод в оттенки серого
-    gray = cv2.cvtColor(img_no_bg_cv, cv2.COLOR_BGR2GRAY)
-    return gray
-
-
-gray = draw_contour(img, img.shape[1], img.shape[0], img.shape[2])
-# cv2.imshow("Result_Gray", gray)
-
-# контрастность до предела
-ret, result = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
-# cv2.imshow("Result", result)
-cv2.waitKey(0)
+    if gray is not None:
+        cv2.imshow("Grayscale Foot (Padded)", gray)
+        cv2.imshow("Mask (Padded)", mask)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
