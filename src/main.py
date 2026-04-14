@@ -46,9 +46,9 @@ def get_clean_foot_step(src_image, target_size=(512, 512)):
     cell_size = 150
 
     for x in range(0, w_orig, cell_size):
-        cv2.line(img_with_grid, (x, 0), (x, h_orig), (0, 0, 0), 4)
+        cv2.line(img_with_grid, (x, 0), (x, h_orig), (0, 0, 0), 5)
     for y in range(0, h_orig, cell_size):
-        cv2.line(img_with_grid, (0, y), (w_orig, y), (0, 0, 0), 4)
+        cv2.line(img_with_grid, (0, y), (w_orig, y), (0, 0, 0), 5)
 
     # Перевод в Grayscale и ресайз
     gray_grid = cv2.cvtColor(img_with_grid, cv2.COLOR_BGR2GRAY)
@@ -69,7 +69,7 @@ def get_maximum_contrast_threshold(gray_image, mask_refined):
     # Накладываем маску, чтобы вернуть идеальный контур
     result = cv2.bitwise_and(binary, mask_refined)
 
-    # Финальная бинаризация для "звенящей" четкости краев
+    # Финальная бинаризация для четкости краев
     _, result = cv2.threshold(result, 127, 255, cv2.THRESH_BINARY)
 
     return result
@@ -80,9 +80,6 @@ if __name__ == "__main__":
     path = "./foots/1/IMG_0315.jpg"
     src = cv2.imread(path)
 
-    if src is None:
-        print(f"Ошибка: Файл {path} не найден.")
-        exit()
 
 
     gray_padded, mask_padded = get_clean_foot_step(src)
@@ -91,7 +88,5 @@ if __name__ == "__main__":
 
     cv2.imshow("Fig 4. Grayscale + Grid", gray_padded)
     cv2.imshow("Fig 5. Final Binary Contour", contrast_padded)
-
-    print("Готово. Нажмите любую клавишу для выхода.")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
