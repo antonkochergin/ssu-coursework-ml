@@ -30,21 +30,18 @@ def get_clean_foot_step(src_image, target_size=(512, 512)):
     """
     no_bg_rgba = remove(src_image)
 
-
     mask = no_bg_rgba[:, :, 3]
 
     _, mask_binary = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
 
-
     kernel = np.ones((3, 3), np.uint8)
     refined_mask = cv2.morphologyEx(mask_binary, cv2.MORPH_OPEN, kernel)
-    refined_mask = cv2.medianBlur(refined_mask, 3)  # Сглаживаем "ступеньки"
+    refined_mask = cv2.medianBlur(refined_mask, 3)  # Сглаживаем "ступеньки" - улучшение
 
-
+    # Сетка
     img_with_grid = src_image.copy()
     h_orig, w_orig = img_with_grid.shape[:2]
     cell_size = 150
-
     for x in range(0, w_orig, cell_size):
         cv2.line(img_with_grid, (x, 0), (x, h_orig), (0, 0, 0), 5)
     for y in range(0, h_orig, cell_size):
@@ -75,18 +72,15 @@ def get_maximum_contrast_threshold(gray_image, mask_refined):
     return result
 
 
-
 if __name__ == "__main__":
     path = "./foots/1/IMG_0315.jpg"
     src = cv2.imread(path)
 
-
-
     gray_padded, mask_padded = get_clean_foot_step(src)
 
     contrast_padded = get_maximum_contrast_threshold(gray_padded, mask_padded)
-
-    cv2.imshow("Fig 4. Grayscale + Grid", gray_padded)
+    cv2.imshow("Fig 3. Gray  ", gray_padded)
+    cv2.imshow("Fig 4. Mask", mask_padded)
     cv2.imshow("Fig 5. Final Binary Contour", contrast_padded)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
