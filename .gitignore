@@ -156,3 +156,6 @@ _minted-*/
 *.MP4
 
 tasks.txt
+
+!src/foots/1
+!src/foots/2
