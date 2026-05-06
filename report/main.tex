@@ -156,4 +156,108 @@
 % документа будет являться приложением
 \appendix
 
+
+\section{Приложение}
+\section{Коды}
+
+
+
+Функция \texttt{resize\_with\_padding} приводит изображение к фиксированному
+размеру $512\times512$ пикселей, сохраняя пропорции и добавляя чёрные полосы.
+Коэффициент масштабирования $\mathrm{scale} = \min(t_w / w,\; t_h / h)$
+выбирается по меньшей стороне, чтобы исключить обрезание. Новые размеры
+$\mathrm{new\_w}, \mathrm{new\_h}$ вычисляются умножением исходных на
+$\mathrm{scale}$ с округлением до целого, после чего вызывается \texttt{cv2.resize}
+с интерполяцией \texttt{INTER\_AREA}, оптимальной для уменьшения. Чёрный холст
+нужного размера заполняется масштабированным изображением по центру. Смещения
+$\mathrm{dx}$ и $\mathrm{dy}$ рассчитываются как половина разности между
+целевыми и новыми размерами. Функция возвращает изображение со строго
+заданными габаритами и неискажёнными пропорциями исходного объекта.
+
+\begin{Verbatim}[
+  numbers=left,
+  breaklines=true,
+  breakanywhere=true
+]
+def resize_with_padding(image, target_size=(512, 512)):
+    """
+    Изменяет размер, сохраняя пропорции, и добавляет черные полосы.
+    """
+    h, w = image.shape[:2]
+    tw, th = target_size
+    scale = min(tw / w, th / h)
+    new_w, new_h = int(w * scale), int(h * scale)
+    resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+    if len(image.shape) == 2:
+        final_image = np.zeros((th, tw), dtype=np.uint8)
+    else:
+        final_image = np.zeros((th, tw, 3), dtype=np.uint8)
+
+    dx = (tw - new_w) // 2
+    dy = (th - new_h) // 2
+    final_image[dy:dy + new_h, dx:dx + new_w] = resized
+    return final_image
+\end{Verbatim}
+
+Функция \texttt{split\_feet\_smart} разделяет изображение с двумя стопами по промежутку
+между ними и применяет нормализующие преобразования. Сначала вызывается
+\texttt{remove} для удаления фона, и из альфа-канала $mask$ бинаризацией
+получается чёрно-белая маска. Функция \texttt{cv2.findContours} выделяет
+внешние контуры и оставляет два крупнейших по площади --- это левая и правая
+стопы. Для каждого контура вычисляется ограничивающий прямоугольник
+\texttt{boundingRect}; прямоугольники сортируются по координате $x$. Линия
+разреза $\mathrm{split\_x}$ проходит посередине между правым краем левого
+прямоугольника и левым краем правого. Левая стопа вырезается как
+\texttt{src\_image[:, :split\_x]} и поворачивается на $180^\circ$, правая ---
+как \texttt{src\_image[:, split\_x:]} с поворотом на $180^\circ$ и
+горизонтальным отражением \texttt{cv2.flip}. В режиме отладки на копии
+изображения отрисовываются линия разреза, ограничивающие прямоугольники и
+контуры. Функция возвращает кортеж из двух или трёх изображений.
+
+\begin{Verbatim}[
+  numbers=left,
+  breaklines=true,
+  breakanywhere=true
+]
+def split_feet_smart(src_image, debug=False):
+    """
+    Разделяет изображение с двумя стопами по промежутку между ними.
+    Левая стопа: поворот на 180 градусов.
+    Правая стопа: поворот на 180 градусов + отражение по горизонтали.
+    """
+    h, w = src_image.shape[:2]
+
+    no_bg = remove(src_image)
+    mask = no_bg[:, :, 3]
+    _, mask_bin = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+
+    contours, _ = cv2.findContours(mask_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:2]
+
+    bboxes = sorted([cv2.boundingRect(c) for c in contours], key=lambda b: b[0])
+    left_edge = bboxes[0][0] + bboxes[0][2]  # правый край левой стопы
+    right_edge = bboxes[1][0]  # левый край правой стопы
+
+    split_x = (left_edge + right_edge) // 2
+
+    # Левая стопа:
+    left_foot = src_image[:, :split_x]
+    left_foot = cv2.rotate(left_foot, cv2.ROTATE_180)
+
+    # Правая стопа:
+    right_foot = src_image[:, split_x:]
+    right_foot = cv2.rotate(right_foot, cv2.ROTATE_180)
+    right_foot = cv2.flip(right_foot, 1)
+
+    if debug:
+        debug_img = src_image.copy()
+        cv2.line(debug_img, (split_x, 0), (split_x, h), (0, 255, 0), 3)
+        for x, y, bw, bh in bboxes:
+            cv2.rectangle(debug_img, (x, y), (x + bw, y + bh), (0, 0, 255), 2)
+        cv2.drawContours(debug_img, contours, -1, (255, 0, 0), 2)
+        return left_foot, right_foot, debug_img
+
+    return left_foot, right_foot
+\end{Verbatim}
 \end{document}
