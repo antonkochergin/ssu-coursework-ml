@@ -36,7 +36,6 @@ def split_feet_smart(src_image, debug=False):
     mask = no_bg[:, :, 3]
     _, mask_bin = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
 
-
     contours, _ = cv2.findContours(mask_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:2]
 
@@ -46,11 +45,9 @@ def split_feet_smart(src_image, debug=False):
 
     split_x = (left_edge + right_edge) // 2
 
-    # Левая стопа:
     left_foot = src_image[:, :split_x]
     left_foot = cv2.rotate(left_foot, cv2.ROTATE_180)
 
-    # Правая стопа:
     right_foot = src_image[:, split_x:]
     right_foot = cv2.rotate(right_foot, cv2.ROTATE_180)
     right_foot = cv2.flip(right_foot, 1)
@@ -81,7 +78,6 @@ def get_clean_foot_step(src_image, target_size=None):
     refined_mask = cv2.morphologyEx(mask_binary, cv2.MORPH_OPEN, kernel)
     refined_mask = cv2.medianBlur(refined_mask, 5)
 
-    # Сетка
     img_with_grid = src_image.copy()
     h_orig, w_orig = img_with_grid.shape[:2]
     cell_size = 60
@@ -90,10 +86,8 @@ def get_clean_foot_step(src_image, target_size=None):
     for y in range(0, h_orig, cell_size):
         cv2.line(img_with_grid, (0, y), (w_orig, y), (0, 0, 0), 3)
 
-    # Перевод в Grayscale
     gray_grid = cv2.cvtColor(img_with_grid, cv2.COLOR_BGR2GRAY)
 
-    # Ресайз только если указан target_size
     if target_size is not None:
         final_gray = resize_with_padding(gray_grid, target_size)
         final_mask = resize_with_padding(refined_mask, target_size)
@@ -111,10 +105,8 @@ def get_maximum_contrast_threshold(gray_image, mask_refined):
 
     _, binary = cv2.threshold(gray_image, 45, 255, cv2.THRESH_BINARY)
 
-
     result = cv2.bitwise_and(binary, mask_refined)
 
-    # Финальная бинаризация для четкости краев
     _, result = cv2.threshold(result, 100, 255, cv2.THRESH_BINARY)
 
     return result
@@ -125,9 +117,7 @@ def imshow_fit(winname, image, max_width=900, max_height=700):
     Показывает изображение, автоматически уменьшая под размер экрана.
     """
     h, w = image.shape[:2]
-
-    scale = min(max_width / w, max_height / h, 1.0)  # не увеличиваем, только уменьшаем
-
+    scale = min(max_width / w, max_height / h, 1.0)
     if scale < 1.0:
         new_w = int(w * scale)
         new_h = int(h * scale)
@@ -139,45 +129,48 @@ def imshow_fit(winname, image, max_width=900, max_height=700):
 
 
 if __name__ == "__main__":
-    path = "./foots/2/IMG_0320.jpg"
-    src = cv2.imread(path)
-
-    # 1. Разделяем
-    left_src, right_src, debug_split = split_feet_smart(src, debug=True)
-
-    raw_rembg = remove(left_src)
-    imshow_fit("DEBUG: raw rembg alpha", raw_rembg[:, :, 3])
-    imshow_fit("DEBUG: raw rembg color", raw_rembg[:, :, :3])
-
-    # 2. Маска и сетка на чистом изображении (без ресайза)
-    left_gray, left_mask = get_clean_foot_step(left_src, target_size=None)
-    right_gray, right_mask = get_clean_foot_step(right_src, target_size=None)
-
-    # 3. Ресайз всего до 512x512
+    path = "./foots/1/IMG_0315.jpg"
+    # path = "./foots/2/IMG_0320.jpg"
+    # path = "./foots/4/IMG_0302.jpg"
+    # path = "./foots/5/IMG_0256.JPG"
+    # path = "./foots/6/IMG_0356.jpg"
     TARGET = (512, 512)
 
-    left_resized = resize_with_padding(left_src, target_size=TARGET)
-    left_gray = resize_with_padding(left_gray, target_size=TARGET)
-    left_mask = resize_with_padding(left_mask, target_size=TARGET)
+    try:
+        src = cv2.imread(path)
 
-    right_resized = resize_with_padding(right_src, target_size=TARGET)
-    right_gray = resize_with_padding(right_gray, target_size=TARGET)
-    right_mask = resize_with_padding(right_mask, target_size=TARGET)
+        left_src, right_src, debug_split = split_feet_smart(src, debug=True)
 
-    # 4. Контраст
-    left_contrast = get_maximum_contrast_threshold(left_gray, left_mask)
-    right_contrast = get_maximum_contrast_threshold(right_gray, right_mask)
+        left_rembg = remove(left_src)
+        # imshow_fit("DEBUG: raw rembg alpha", raw_rembg[:, :, 3])
+        imshow_fit("left rembg color", left_rembg[:, :, :3])
 
-    # Показываем
-    # cv2.imshow("Left Foot - Mask", left_mask)
-    # cv2.imshow("Left Foot - Contrast", left_contrast)
-    cv2.imshow("Left Foot - Resized 512x512", left_resized)
-    # cv2.imshow("Right Foot - Mask", right_mask)
-    cv2.imshow("Right Foot - Contrast", right_contrast)
-    cv2.imshow("Right Foot - Resized 512x512", right_resized)
+        right_rembg = remove(right_src)
+        imshow_fit("right rembg color", right_rembg[:, :, :3])
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        left_gray, left_mask = get_clean_foot_step(left_src, target_size=None)
+        right_gray, right_mask = get_clean_foot_step(right_src, target_size=None)
 
+        left_resized = resize_with_padding(left_src, target_size=TARGET)
+        left_gray = resize_with_padding(left_gray, target_size=TARGET)
+        left_mask = resize_with_padding(left_mask, target_size=TARGET)
 
+        right_resized = resize_with_padding(right_src, target_size=TARGET)
+        right_gray = resize_with_padding(right_gray, target_size=TARGET)
+        right_mask = resize_with_padding(right_mask, target_size=TARGET)
 
+        left_contrast = get_maximum_contrast_threshold(left_gray, left_mask)
+        right_contrast = get_maximum_contrast_threshold(right_gray, right_mask)
+
+        # cv2.imshow("Left Foot - Mask", left_mask)
+        cv2.imshow("Left Foot - Contrast", left_contrast)
+        cv2.imshow("Left Foot - Resized 512x512", left_resized)
+
+        # cv2.imshow("Right Foot - Mask", right_mask)
+        cv2.imshow("Right Foot - Contrast", right_contrast)
+        cv2.imshow("Right Foot - Resized 512x512", right_resized)
+
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    except:
+        print("Не получилось - проверь файл ")
