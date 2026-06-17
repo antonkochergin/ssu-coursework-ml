@@ -2,428 +2,507 @@ import cv2
 import numpy as np
 from rembg import remove
 
+# =============================================================================
+# КОНСТАНТЫ
+# =============================================================================
 
-def resize_with_padding(image, target_size=(512, 512)):
-    """
-    Изменяет размер, сохраняя пропорции, и добавляет черные полосы.
-    """
-    h, w = image.shape[:2]
-    tw, th = target_size
-    scale = min(tw / w, th / h)
-    new_w, new_h = int(w * scale), int(h * scale)
-    resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+# Параметры для маски стопы
+FOOT_MASK_THRESHOLD = 100
+MORPHOLOGY_KERNEL_SIZE = 5
 
-    if len(image.shape) == 2:
-        final_image = np.zeros((th, tw), dtype=np.uint8)
-    else:
-        final_image = np.zeros((th, tw, 3), dtype=np.uint8)
+# Параметры для маски плантограммы (зеленый цвет в HSV)
+HSV_LOWER_GREEN = np.array([74, 149, 141])
+HSV_UPPER_GREEN = np.array([86, 255, 194])
+MIN_PLANTOGRAM_AREA = 50000
 
-    dx = (tw - new_w) // 2
-    dy = (th - new_h) // 2
-    final_image[dy:dy + new_h, dx:dx + new_w] = resized
-    return final_image
+# Параметры для поиска точек A и B
+INNER_EDGE_OFFSET = 20
+TOE_AREA_RATIO = 0.3  # верхние 30% стопы - носочная часть
+HEEL_AREA_RATIO = 0.65  # нижние 35% стопы - пятка
+TOE_SEARCH_STEP = 5  # шаг поиска по Y в носочной части
+TOE_Y_TOLERANCE = 3  # допуск по Y для группировки точек
 
+# Параметры для расчета индекса Штриттера
+PERP_DIST_TOLERANCE = 10  # допуск для поиска точек на перпендикуляре
+PERP_DIST_TOLERANCE_FALLBACK = 20
+
+# Параметры для визуализации
+PERP_LINE_EXTEND = 2000  # длина перпендикуляра
+FONT_SCALE = 1.2
+FONT_THICKNESS = 3
+POINT_SIZE_LARGE = 18
+POINT_SIZE_MEDIUM = 14
+CROSS_SIZE = 20
+
+# Границы для классификации типа стопы
+FOOT_TYPE_BOUNDARIES = [
+    (36.0, "Высокосводчатая (полая)"),
+    (43.0, "Повышенный свод"),
+    (50.0, "Нормальная"),
+    (60.0, "Уплощенная"),
+    (float('inf'), "Плоскостопие")
+]
+
+
+# =============================================================================
+# ОБРАБОТКА ИЗОБРАЖЕНИЯ
+# =============================================================================
 
 def split_feet_smart(src_image, debug=False):
     """
-    Разделяет изображение с двумя стопами по промежутку между ними.
-    Левая стопа: поворот на 180 градусов.
-    Правая стопа: поворот на 180 градусов + отражение по горизонтали.
+    Разделяет изображение на две стопы: левую и правую.
+
+    Args:
+        src_image: исходное изображение
+        debug: флаг для отладки
+
+    Returns:
+        left_foot, right_foot, debug_img
     """
     h, w = src_image.shape[:2]
 
+    # Удаляем фон и получаем маску
     no_bg = remove(src_image)
     mask = no_bg[:, :, 3]
     _, mask_bin = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
 
-    contours, _ = cv2.findContours(mask_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Находим контуры стоп
+    contours, _ = cv2.findContours(
+        mask_bin,
+        cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_SIMPLE
+    )
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:2]
 
+    # Определяем bounding boxes и точку разделения
     bboxes = sorted([cv2.boundingRect(c) for c in contours], key=lambda b: b[0])
-    left_edge = bboxes[0][0] + bboxes[0][2]  # правый край левой стопы
-    right_edge = bboxes[1][0]  # левый край правой стопы
+    split_x = (bboxes[0][0] + bboxes[0][2] + bboxes[1][0]) // 2
 
-    split_x = (left_edge + right_edge) // 2
-
-    left_foot = src_image[:, :split_x]
-    left_foot = cv2.rotate(left_foot, cv2.ROTATE_180)
-
-    right_foot = src_image[:, split_x:]
-    right_foot = cv2.rotate(right_foot, cv2.ROTATE_180)
+    # Разделяем и поворачиваем стопы
+    left_foot = cv2.rotate(src_image[:, :split_x].copy(), cv2.ROTATE_180)
+    right_foot = cv2.rotate(src_image[:, split_x:].copy(), cv2.ROTATE_180)
     right_foot = cv2.flip(right_foot, 1)
 
-    if debug:
-        debug_img = src_image.copy()
-        cv2.line(debug_img, (split_x, 0), (split_x, h), (0, 255, 0), 3)
-        for x, y, bw, bh in bboxes:
-            cv2.rectangle(debug_img, (x, y), (x + bw, y + bh), (0, 0, 255), 2)
-        cv2.drawContours(debug_img, contours, -1, (255, 0, 0), 2)
-        return left_foot, right_foot, debug_img
+    # Отладочное изображение
+    debug_img = src_image.copy()
+    cv2.line(debug_img, (split_x, 0), (split_x, h), (0, 255, 0), 2)
+    cv2.drawContours(debug_img, contours, -1, (255, 0, 0), 2)
+    for x, y, bw, bh in bboxes:
+        cv2.rectangle(debug_img, (x, y), (x + bw, y + bh), (0, 0, 255), 2)
 
-    return left_foot, right_foot
+    return left_foot, right_foot, debug_img
 
 
-def get_clean_foot_step(src_image, target_size=None):
+def get_foot_mask(src_image):
     """
-    Получение чистой маски и серого изображения с сеткой.
-    Если target_size=None — возвращает без ресайза.
+    Получает бинарную маску стопы.
+
+    Args:
+        src_image: изображение стопы
+
+    Returns:
+        бинарная маска стопы
     """
-    no_bg_rgba = remove(src_image)
+    no_bg = remove(src_image)
+    foot_mask = no_bg[:, :, 3]
+    _, foot_mask = cv2.threshold(foot_mask, FOOT_MASK_THRESHOLD, 255, cv2.THRESH_BINARY)
 
-    mask = no_bg_rgba[:, :, 3]
+    kernel = np.ones((MORPHOLOGY_KERNEL_SIZE, MORPHOLOGY_KERNEL_SIZE), np.uint8)
+    foot_mask = cv2.morphologyEx(foot_mask, cv2.MORPH_CLOSE, kernel)
 
-    _, mask_binary = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
-
-    kernel = np.ones((3, 3), np.uint8)
-    refined_mask = cv2.morphologyEx(mask_binary, cv2.MORPH_OPEN, kernel)
-    refined_mask = cv2.medianBlur(refined_mask, 5)
-
-    img_with_grid = src_image.copy()
-    h_orig, w_orig = img_with_grid.shape[:2]
-    cell_size = 60
-    for x in range(0, w_orig, cell_size):
-        cv2.line(img_with_grid, (x, 0), (x, h_orig), (0, 0, 0), 3)
-    for y in range(0, h_orig, cell_size):
-        cv2.line(img_with_grid, (0, y), (w_orig, y), (0, 0, 0), 3)
-
-    gray_grid = cv2.cvtColor(img_with_grid, cv2.COLOR_BGR2GRAY)
-
-    if target_size is not None:
-        final_gray = resize_with_padding(gray_grid, target_size)
-        final_mask = resize_with_padding(refined_mask, target_size)
-    else:
-        final_gray = gray_grid
-        final_mask = refined_mask
-
-    return final_gray, final_mask
+    return foot_mask
 
 
-def get_maximum_contrast_threshold(gray_image, mask_refined):
+def get_plantogram_mask(src_image, foot_mask):
     """
-    Создание финального бинарного изображения
+    Получает маску плантограммы (зеленой области внутри стопы).
+
+    Args:
+        src_image: изображение стопы
+        foot_mask: маска стопы
+
+    Returns:
+        бинарная маска плантограммы
     """
+    hsv = cv2.cvtColor(src_image, cv2.COLOR_BGR2HSV)
+    green_mask = cv2.inRange(hsv, HSV_LOWER_GREEN, HSV_UPPER_GREEN)
+    green_mask = cv2.bitwise_and(green_mask, foot_mask)
 
-    _, binary = cv2.threshold(gray_image, 45, 255, cv2.THRESH_BINARY)
+    # Оставляем только крупные области
+    contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    clean_mask = np.zeros_like(green_mask)
+    for cnt in contours:
+        if cv2.contourArea(cnt) > MIN_PLANTOGRAM_AREA:
+            cv2.drawContours(clean_mask, [cnt], -1, 255, -1)
 
-    result = cv2.bitwise_and(binary, mask_refined)
+    return clean_mask
 
-    _, result = cv2.threshold(result, 100, 255, cv2.THRESH_BINARY)
+
+def get_largest_contour(mask):
+    """
+    Находит самый большой контур в маске.
+
+    Args:
+        mask: бинарная маска
+
+    Returns:
+        самый большой контур
+    """
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    return max(contours, key=cv2.contourArea)
+
+
+def draw_contours(image, foot_mask, plant_mask):
+    """
+    Отрисовывает контуры стопы и плантограммы на изображении.
+
+    Args:
+        image: исходное изображение
+        foot_mask: маска стопы
+        plant_mask: маска плантограммы
+
+    Returns:
+        изображение с нарисованными контурами
+    """
+    result = image.copy()
+
+    # Контур стопы (синий)
+    foot_contours, _ = cv2.findContours(foot_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(result, foot_contours, -1, (255, 0, 0), 2)
+
+    # Контур плантограммы (красный)
+    plant_contours, _ = cv2.findContours(plant_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(result, plant_contours, -1, (0, 0, 255), 2)
 
     return result
 
 
-def imshow_fit(winname, image, max_width=900, max_height=700):
+# =============================================================================
+# ПОИСК ТОЧЕК A И B
+# =============================================================================
+
+def find_A_at_widest_toe(plant_contour):
     """
-    Показывает изображение, автоматически уменьшая под размер экрана.
+    Находит точку A как самую широкую точку в носочной части стопы.
+
+    Args:
+        plant_contour: контур плантограммы
+
+    Returns:
+        координаты точки A (внутренний край в самой широкой части носка)
     """
-    h, w = image.shape[:2]
-    scale = min(max_width / w, max_height / h, 1.0)
-    if scale < 1.0:
-        new_w = int(w * scale)
-        new_h = int(h * scale)
-        display = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
-    else:
-        display = image
+    pts = plant_contour[:, 0, :]
+    y_min, y_max = np.min(pts[:, 1]), np.max(pts[:, 1])
+    height = y_max - y_min
 
-    cv2.imshow(winname, display)
+    # Носочная часть (верхние 30%)
+    toe_threshold = y_min + height * TOE_AREA_RATIO
+    toe_pts = pts[pts[:, 1] < toe_threshold]
+
+    if len(toe_pts) == 0:
+        toe_threshold = y_min + height * 0.25
+        toe_pts = pts[pts[:, 1] < toe_threshold]
+
+    # Поиск самой широкой точки
+    max_width = 0
+    best_left = None
+
+    for y in np.arange(int(y_min), int(toe_threshold), TOE_SEARCH_STEP):
+        level_pts = pts[np.abs(pts[:, 1] - y) < TOE_Y_TOLERANCE]
+        if len(level_pts) > 1:
+            left_x, right_x = np.min(level_pts[:, 0]), np.max(level_pts[:, 0])
+            width = right_x - left_x
+
+            if width > max_width:
+                max_width = width
+                left_pts = level_pts[level_pts[:, 0] == left_x]
+                if len(left_pts) > 0:
+                    best_left = tuple(left_pts[0])
+
+    # Fallback: если не нашли, берем крайнюю левую точку
+    if best_left is None:
+        min_x = np.min(toe_pts[:, 0])
+        best_left_pts = toe_pts[toe_pts[:, 0] == min_x]
+        best_left = tuple(best_left_pts[0]) if len(best_left_pts) > 0 else (0, 0)
+
+    return best_left
 
 
-def find_foot_axis_by_diameter(mask):
+def find_B_at_leftmost_heel(plant_contour):
     """
-    Находит продольную ось через крайние точки контура по оси Y.
-    Быстро и точно для стоп, ориентированных пяткой вверх.
+    Находит точку B как крайнюю левую точку в области пятки.
+
+    Args:
+        plant_contour: контур плантограммы
+
+    Returns:
+        координаты точки B (крайняя левая точка пятки)
     """
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if not contours:
-        return None, None, None
+    pts = plant_contour[:, 0, :]
+    y_min, y_max = np.min(pts[:, 1]), np.max(pts[:, 1])
+    height = y_max - y_min
 
-    cnt = max(contours, key=cv2.contourArea)
+    # Область пятки (нижние 35%)
+    heel_threshold = y_min + height * HEEL_AREA_RATIO
+    heel_pts = pts[pts[:, 1] > heel_threshold]
 
-    # Все точки контура
-    points = cnt.reshape(-1, 2)
+    if len(heel_pts) == 0:
+        heel_threshold = y_min + height * 0.7
+        heel_pts = pts[pts[:, 1] > heel_threshold]
 
-    # Самая верхняя точка (минимальный Y) — пятка
-    top_idx = np.argmin(points[:, 1])
-    top_point = tuple(points[top_idx])
-
-    # Самая нижняя точка (максимальный Y) — пальцы
-    bottom_idx = np.argmax(points[:, 1])
-    bottom_point = tuple(points[bottom_idx])
-
-    # Длина оси
-    length = np.sqrt((bottom_point[0] - top_point[0]) ** 2 +
-                     (bottom_point[1] - top_point[1]) ** 2)
-
-    return top_point, bottom_point, length
+    # Крайняя левая точка
+    B_idx = np.argmin(heel_pts[:, 0])
+    return tuple(heel_pts[B_idx])
 
 
-def find_transverse_section(mask, top_point, bottom_point):
+def find_AB_points_final(plant_contour):
     """
-    Находит поперечный срез стопы через середину продольной оси.
+    Находит точки A и B для расчета индекса Штриттера.
 
-    Параметры:
-    - mask: бинарная маска стопы
-    - top_point: (x, y) — точка пятки
-    - bottom_point: (x, y) — точка пальцев
+    Args:
+        plant_contour: контур плантограммы
 
-    Возвращает:
-    - left_point: (x, y) — левая точка пересечения с контуром
-    - right_point: (x, y) — правая точка пересечения с контуром
-    - mid_point: (x, y) — середина продольной оси (точка пересечения срезов)
-    - transverse_length: длина поперечного среза в пикселях
+    Returns:
+        A, B - координаты точек
     """
-    # Середина продольной оси
-    mid_x = (top_point[0] + bottom_point[0]) / 2
-    mid_y = (top_point[1] + bottom_point[1]) / 2
-    mid_point = (mid_x, mid_y)
-
-    # Направляющий вектор продольной оси
-    dx_long = bottom_point[0] - top_point[0]
-    dy_long = bottom_point[1] - top_point[1]
-
-    # Перпендикулярный вектор
-    dx_perp = -dy_long
-    dy_perp = dx_long
-
-    # Нормализуем
-    length_perp = np.sqrt(dx_perp ** 2 + dy_perp ** 2)
-    if length_perp == 0:
-        return None, None, None, None
-    dx_perp /= length_perp
-    dy_perp /= length_perp
-
-    # Контур стопы
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if not contours:
-        return None, None, None, None
-    cnt = max(contours, key=cv2.contourArea)
-
-    # Ищем пересечения перпендикуляра с контуром
-    # Идём от середины влево и вправо с малым шагом
-    left_point = None
-    right_point = None
-    step = 1.0
-
-    # Влево (отрицательное направление)
-    for i in range(int(length_perp * 2)):
-        t = -i * step
-        x = int(mid_x + t * dx_perp)
-        y = int(mid_y + t * dy_perp)
-
-        # Проверяем, вышли ли за пределы изображения
-        if x < 0 or x >= mask.shape[1] or y < 0 or y >= mask.shape[0]:
-            break
-
-        # Проверяем, внутри ли контура
-        if cv2.pointPolygonTest(cnt, (x, y), False) < 0:
-            left_point = (x + int(step * dx_perp), y + int(step * dy_perp))
-            break
-
-    # Вправо (положительное направление)
-    for i in range(int(length_perp * 2)):
-        t = i * step
-        x = int(mid_x + t * dx_perp)
-        y = int(mid_y + t * dy_perp)
-
-        if x < 0 or x >= mask.shape[1] or y < 0 or y >= mask.shape[0]:
-            break
-
-        if cv2.pointPolygonTest(cnt, (x, y), False) < 0:
-            right_point = (x - int(step * dx_perp), y - int(step * dy_perp))
-            break
-
-    # Если не нашли — ищем по всем точкам контура
-    if left_point is None or right_point is None:
-        min_proj = float('inf')
-        max_proj = float('-inf')
-
-        for point in cnt:
-            px, py = point[0]
-            # Проекция точки на перпендикуляр
-            proj = (px - mid_x) * dx_perp + (py - mid_y) * dy_perp
-
-            if proj < min_proj:
-                min_proj = proj
-                left_point = (px, py)
-            if proj > max_proj:
-                max_proj = proj
-                right_point = (px, py)
-
-    # Длина поперечного среза
-    transverse_length = np.sqrt((right_point[0] - left_point[0]) ** 2 +
-                                (right_point[1] - left_point[1]) ** 2)
-
-    return left_point, right_point, mid_point, transverse_length
+    A = find_A_at_widest_toe(plant_contour)
+    B = find_B_at_leftmost_heel(plant_contour)
+    return A, B
 
 
-def visualize_sections(foot_image, mask):
+# =============================================================================
+# РАСЧЕТ ИНДЕКСА ШТРИТТЕРА
+# =============================================================================
+
+def draw_points_on_image(debug_img, A, B, V, G, D, perp_dx, perp_dy):
     """
-    Рисует продольный и поперечный срезы.
+    Отрисовка всех точек, линий и подписей на изображении.
+
+    Args:
+        debug_img: изображение для отрисовки
+        A, B, V, G, D: координаты точек
+        perp_dx, perp_dy: направляющий вектор перпендикуляра
     """
-    # Продольная ось
-    top, bottom, long_length = find_foot_axis_by_diameter(mask)
+    # Отрезок AB (желтый)
+    cv2.line(debug_img, A, B, (0, 255, 255), 3)
 
-    if top is None:
-        return foot_image
+    # Перпендикуляр (фиолетовый)
+    h, w = debug_img.shape[:2]
+    perp_len = max(PERP_LINE_EXTEND, max(h, w) * 2)
+    start_point = (int(V[0] - perp_dx * perp_len), int(V[1] - perp_dy * perp_len))
+    end_point = (int(V[0] + perp_dx * perp_len), int(V[1] + perp_dy * perp_len))
+    cv2.line(debug_img, start_point, end_point, (200, 0, 255), 4)
 
-    # Поперечный срез
-    left_pt, right_pt, mid_pt, trans_length = find_transverse_section(
-        mask, top, bottom
-    )
+    # Точки
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    thickness = FONT_THICKNESS
+    font_scale = FONT_SCALE
 
-    result = foot_image.copy()
+    # Точки G и D (пересечения с контуром)
+    for point, color, label, offset in [
+        (G, (255, 255, 0), "G", (-60, -35)),
+        (D, (0, 255, 255), "D", (25, -25)),
+        (V, (0, 255, 0), "V", (25, -20)),
+    ]:
+        cv2.circle(debug_img, point, POINT_SIZE_LARGE, color, -1)
+        cv2.circle(debug_img, point, POINT_SIZE_LARGE, (0, 0, 0), 3)
+        cv2.putText(debug_img, label,
+                    (point[0] + offset[0], point[1] + offset[1]),
+                    font, font_scale, (0, 0, 0), thickness + 2)
+        cv2.putText(debug_img, label,
+                    (point[0] + offset[0], point[1] + offset[1]),
+                    font, font_scale, color, thickness)
 
-    # Продольная ось
-    cv2.line(result, top, bottom, (255, 0, 0), 2)
-    cv2.circle(result, top, 6, (0, 0, 255), -1)
-    cv2.circle(result, bottom, 6, (0, 255, 255), -1)
+    # Точки A и B
+    cv2.circle(debug_img, A, POINT_SIZE_MEDIUM, (255, 0, 0), -1)
+    cv2.circle(debug_img, A, POINT_SIZE_MEDIUM, (0, 0, 0), 2)
+    cv2.putText(debug_img, "A", (A[0] - 50, A[1] - 30),
+                font, font_scale, (0, 0, 0), thickness + 2)
+    cv2.putText(debug_img, "A", (A[0] - 50, A[1] - 30),
+                font, font_scale, (255, 0, 0), thickness)
 
-    # Поперечный срез
-    if left_pt and right_pt:
-        cv2.line(result, left_pt, right_pt, (0, 255, 0), 2)
-        cv2.circle(result, left_pt, 6, (255, 0, 255), -1)
-        cv2.circle(result, right_pt, 6, (255, 255, 0), -1)
+    cv2.circle(debug_img, B, POINT_SIZE_MEDIUM, (0, 0, 255), -1)
+    cv2.circle(debug_img, B, POINT_SIZE_MEDIUM, (0, 0, 0), 2)
+    cv2.putText(debug_img, "B", (B[0] - 50, B[1] + 45),
+                font, font_scale, (0, 0, 0), thickness + 2)
+    cv2.putText(debug_img, "B", (B[0] - 50, B[1] + 45),
+                font, font_scale, (0, 0, 255), thickness)
 
-    # Точка пересечения
-    cv2.circle(result, (int(mid_pt[0]), int(mid_pt[1])), 5, (255, 255, 255), -1)
-
-    # Подписи
-    cv2.putText(result, f"L-long: {long_length:.1f} px", (10, 25),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-    cv2.putText(result, f"L-trans: {trans_length:.1f} px", (10, 50),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-
-    return result
-
-
-def visualize_foot_axis(foot_image, mask):
-    top, bottom, length = find_foot_axis_by_diameter(mask)
-
-    if top is None:
-        return foot_image
-
-    result = foot_image.copy()
-
-    # Ось
-    cv2.line(result, top, bottom, (255, 0, 0), 2)
-    cv2.circle(result, top, 6, (0, 0, 255), -1)
-    cv2.circle(result, bottom, 6, (0, 255, 255), -1)
-
-    # Середина оси
-    mid_x = (top[0] + bottom[0]) // 2
-    mid_y = (top[1] + bottom[1]) // 2
-    cv2.circle(result, (mid_x, mid_y), 5, (0, 255, 0), -1)
-
-    cv2.putText(result, f"Length: {length:.1f} px", (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-
-    return result
+    # Крестик в точке V
+    cv2.line(debug_img, (V[0] - CROSS_SIZE, V[1]), (V[0] + CROSS_SIZE, V[1]), (0, 0, 0), 2)
+    cv2.line(debug_img, (V[0], V[1] - CROSS_SIZE), (V[0], V[1] + CROSS_SIZE), (0, 0, 0), 2)
 
 
-def find_inner_edge_points(mask):
+def get_foot_type(index):
     """
-    Находит точки внутреннего края стопы (со стороны большого пальца).
-    Для левой стопы внутренний край — правый, для правой — левый.
-    Но после поворота на 180° и отражения обе стопы смотрят влево,
-    поэтому внутренний край = правый (максимальный X в каждой строке).
+    Определяет тип стопы по индексу Штриттера.
+
+    Args:
+        index: значение индекса Штриттера
+
+    Returns:
+        строковое название типа стопы
     """
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if not contours:
+    if index is None:
         return None
-    cnt = max(contours, key=cv2.contourArea)
-    points = cnt.reshape(-1, 2)
-    return points
+    for threshold, name in FOOT_TYPE_BOUNDARIES:
+        if index <= threshold:
+            return name
+    return "Плоскостопие"
 
+
+def calculate_strieter_index_full(plant_contour, A, B, debug_img=None):
+    """
+    Полный расчет индекса Штриттера.
+
+    Этапы:
+    1. Находит центр отрезка AB (точка V)
+    2. Строит перпендикуляр к AB через точку V
+    3. Находит точки пересечения с контуром (G и D)
+    4. Рассчитывает индекс по формуле: I = (GD * 100) / VD
+
+    Args:
+        plant_contour: контур плантограммы
+        A, B: координаты точек A и B
+        debug_img: изображение для визуализации (опционально)
+
+    Returns:
+        index, V, G, D, foot_type
+    """
+    # 1. Центр отрезка AB (точка V)
+    V = ((A[0] + B[0]) // 2, (A[1] + B[1]) // 2)
+
+    # 2. Вектор перпендикуляра к AB
+    dx, dy = B[0] - A[0], B[1] - A[1]
+    length = np.sqrt(dx * dx + dy * dy)
+    if length == 0:
+        return None, None, None, None, None
+
+    perp_dx, perp_dy = -dy / length, dx / length
+
+    # 3. Поиск точек пересечения перпендикуляра с контуром
+    pts = plant_contour[:, 0, :]
+    projections = []
+
+    for p in pts:
+        vx, vy = p[0] - V[0], p[1] - V[1]
+        proj = vx * perp_dx + vy * perp_dy
+        dist_to_perp = abs(vx * (-perp_dy) + vy * perp_dx)
+
+        if dist_to_perp < PERP_DIST_TOLERANCE:
+            projections.append((proj, p))
+
+    if len(projections) < 2:
+        for p in pts:
+            vx, vy = p[0] - V[0], p[1] - V[1]
+            dist_to_perp = abs(vx * (-perp_dy) + vy * perp_dx)
+            if dist_to_perp < PERP_DIST_TOLERANCE_FALLBACK:
+                proj = vx * perp_dx + vy * perp_dy
+                projections.append((proj, p))
+
+    if len(projections) < 2:
+        print("Не удалось найти точки пересечения")
+        return None, None, None, None, None
+
+    projections.sort(key=lambda x: x[0])
+    min_proj, point_min = projections[0]
+    max_proj, point_max = projections[-1]
+
+    # Определяем внутренний и наружный край
+    if point_min[0] < point_max[0]:
+        G, D = point_min, point_max
+        GD, VD = max_proj - min_proj, abs(max_proj)
+    else:
+        G, D = point_max, point_min
+        GD, VD = max_proj - min_proj, abs(min_proj)
+
+    # 4. Расчет индекса
+    index = (GD * 100) / VD if VD > 0 else None
+    foot_type = get_foot_type(index)
+
+    # Визуализация
+    if debug_img is not None and index is not None:
+        draw_points_on_image(debug_img, A, B, V, G, D, perp_dx, perp_dy)
+
+    return index, V, G, D, foot_type
+
+
+# =============================================================================
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# =============================================================================
+
+def show(name, img, max_w=1200, max_h=800):
+    """
+    Отображает изображение в окне с автоматическим масштабированием.
+
+    Args:
+        name: название окна
+        img: изображение
+        max_w, max_h: максимальные размеры окна
+    """
+    h, w = img.shape[:2]
+    scale = min(max_w / w, max_h / h, 1.0)
+    if scale < 1:
+        img = cv2.resize(img, (int(w * scale), int(h * scale)))
+    cv2.imshow(name, img)
+
+
+def process_foot(foot, label):
+    """
+    Обрабатывает одну стопу: строит маски, находит точки и рассчитывает индекс.
+
+    Args:
+        foot: изображение стопы
+        label: название для вывода
+
+    Returns:
+        vis, index, foot_type
+    """
+    foot_mask = get_foot_mask(foot)
+    plant_mask = get_plantogram_mask(foot, foot_mask)
+    vis = draw_contours(foot, foot_mask, plant_mask)
+
+    plant_contour = get_largest_contour(plant_mask)
+    A, B = find_AB_points_final(plant_contour)
+    index, V, G, D, foot_type = calculate_strieter_index_full(plant_contour, A, B, vis)
+
+    print(f"\n=== {label} ===")
+    print(f"  Точка A: {A}")
+    print(f"  Точка B: {B}")
+    print(f"  Центр V: {V}")
+    print(f"  Точка G (внутренний край): {G}")
+    print(f"  Точка D (наружный край): {D}")
+    print(f"  GD = {np.sqrt((D[0] - G[0]) ** 2 + (D[1] - G[1]) ** 2):.1f} px")
+    print(f"  VD = {np.sqrt((D[0] - V[0]) ** 2 + (D[1] - V[1]) ** 2):.1f} px")
+    print(f"  Индекс Штриттера: {index:.1f}")
+    print(f"  Тип стопы: {foot_type}")
+
+    return vis, index, foot_type
+
+
+# =============================================================================
+# ОСНОВНАЯ ПРОГРАММА
+# =============================================================================
 
 if __name__ == "__main__":
     path = "./foots/4/IMG_0302.jpg"
-    TARGET = (512, 512)
-
     src = cv2.imread(path)
+
     if src is None:
-        print(f"Ошибка загрузки {path}")
-        exit()
+        raise Exception("Image not found")
 
-    left_src, right_src, debug_split = split_feet_smart(src, debug=True)
-    left_rembg = remove(left_src)
+    left, right, debug = split_feet_smart(src, debug=True)
 
-    # маска (без ресайза)
-    left_gray, left_mask = get_clean_foot_step(left_src, target_size=None)
-    right_gray, right_mask = get_clean_foot_step(right_src, target_size=None)
+    # Обработка левой стопы
+    left_vis, idx_left, type_left = process_foot(left, "ЛЕВАЯ СТОПА")
 
-    # ось для левой стопы
-    top, bottom, length = find_foot_axis_by_diameter(left_mask)
-    # срезы для левой стопы
-    left_sections = visualize_sections(left_src, left_mask)
+    # Обработка правой стопы
+    right_vis, idx_right, type_right = process_foot(right, "ПРАВАЯ СТОПА")
 
-    if top is not None:
-        print(f"Левая стопа:")
-        print(f"  Пятка: {top}")
-        print(f"  Пальцы: {bottom}")
-        print(f"  Длина оси: {length:.1f} px")
-
-
-    left_axis_img = visualize_foot_axis(left_src, left_mask)
-
-
-    imshow_fit("Left - Axis", left_axis_img)
-    imshow_fit("Left - Mask", left_mask)
-    imshow_fit("left rembg color", left_rembg[:, :, :3])
-    imshow_fit("Left - Sections", left_sections)
-
-    top, bottom, long_len = find_foot_axis_by_diameter(left_mask)
-    left_pt, right_pt, mid_pt, trans_len = find_transverse_section(left_mask, top, bottom)
-
-    k2 = trans_len / long_len
-    print(f"k2 = {k2:.3f}")
-
+    # Отображение результатов
+    show("LEFT RESULT", left_vis)
+    show("RIGHT RESULT", right_vis)
+    show("DEBUG SPLIT", debug)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-# if __name__ == "__main__":
-#     # path = "./foots/1/IMG_0315.jpg"
-#     # path = "./foots/2/IMG_0320.jpg"
-#     path = "./foots/4/IMG_0302.jpg"
-#     # path = "./foots/5/IMG_0256.JPG"
-#     # path = "./foots/6/IMG_0356.jpg"
-#     TARGET = (512, 512)
-#
-#     try:
-#         src = cv2.imread(path)
-#
-#         left_src, right_src, debug_split = split_feet_smart(src, debug=True)
-#
-#         left_rembg = remove(left_src)
-#         # imshow_fit("DEBUG: raw rembg alpha", raw_rembg[:, :, 3])
-#         imshow_fit("left rembg color", left_rembg[:, :, :3])
-#
-#         right_rembg = remove(right_src)
-#         imshow_fit("right rembg color", right_rembg[:, :, :3])
-#
-#         left_gray, left_mask = get_clean_foot_step(left_src, target_size=None)
-#         right_gray, right_mask = get_clean_foot_step(right_src, target_size=None)
-#
-#         left_resized = resize_with_padding(left_src, target_size=TARGET)
-#         left_gray = resize_with_padding(left_gray, target_size=TARGET)
-#         left_mask = resize_with_padding(left_mask, target_size=TARGET)
-#
-#         right_resized = resize_with_padding(right_src, target_size=TARGET)
-#         right_gray = resize_with_padding(right_gray, target_size=TARGET)
-#         right_mask = resize_with_padding(right_mask, target_size=TARGET)
-#
-#         left_contrast = get_maximum_contrast_threshold(left_gray, left_mask)
-#         right_contrast = get_maximum_contrast_threshold(right_gray, right_mask)
-#
-#         # cv2.imshow("Left Foot - Mask", left_mask)
-#         cv2.imshow("Left Foot - Contrast", left_contrast)
-#         cv2.imshow("Left Foot - Resized 512x512", left_resized)
-#
-#         # cv2.imshow("Right Foot - Mask", right_mask)
-#         cv2.imshow("Right Foot - Contrast", right_contrast)
-#         cv2.imshow("Right Foot - Resized 512x512", right_resized)
-#
-#         cv2.waitKey(0)
-#         cv2.destroyAllWindows()
-#     except:
-#         print("Не получилось - проверь файл ")
