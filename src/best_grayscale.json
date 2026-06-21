@@ -1,0 +1,9 @@
+{
+  "generation": 25,
+  "fitness": 83.80210489192788,
+  "params": {
+    "THRESHOLD": 121,
+    "MIN_AREA": 74549,
+    "CLOSE_SIZE": 11
+  }
+}

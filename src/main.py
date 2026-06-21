@@ -485,7 +485,7 @@ def process_foot(foot, label):
 # =============================================================================
 
 if __name__ == "__main__":
-    path = "./foots/4/IMG_0302.jpg"
+    path = "foots/4/IMG_0302.jpg"
     src = cv2.imread(path)
 
     if src is None:
