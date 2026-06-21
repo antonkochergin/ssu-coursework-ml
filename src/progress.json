@@ -1,0 +1,806 @@
+{
+  "completed": [
+    "8_2",
+    "15_1",
+    "22_2",
+    "10_2",
+    "16_2",
+    "17_1",
+    "23_1",
+    "15_2",
+    "4_1",
+    "11_1",
+    "20_1",
+    "1_2",
+    "21_2",
+    "10_1",
+    "19_1",
+    "14_2",
+    "13_1",
+    "19_2",
+    "9_2",
+    "8_1",
+    "5_1",
+    "1_1",
+    "16_1",
+    "2_1",
+    "12_2",
+    "14_1",
+    "9_1",
+    "11_2",
+    "7_2",
+    "24_1",
+    "2_2",
+    "18_2",
+    "24_2",
+    "13_2",
+    "6_2",
+    "25_1",
+    "20_2",
+    "6_1",
+    "21_1",
+    "7_1",
+    "23_2",
+    "12_1",
+    "22_1",
+    "25_2"
+  ],
+  "skipped": [
+    "4_2",
+    "3_1",
+    "18_1",
+    "17_2",
+    "5_2",
+    "3_2"
+  ],
+  "results": {
+    "10_1": {
+      "index": 29.957822474153083,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 112,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "10_2": {
+      "index": 35.616449984932025,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 72,
+        "V_HIGH": 106,
+        "MIN_AREA": 0,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "11_1": {
+      "index": 39.300265478204665,
+      "foot_type": "\u041f\u043e\u0432\u044b\u0448\u0435\u043d\u043d\u044b\u0439 \u0441\u0432\u043e\u0434",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 131,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "11_2": {
+      "index": 40.84719355345197,
+      "foot_type": "\u041f\u043e\u0432\u044b\u0448\u0435\u043d\u043d\u044b\u0439 \u0441\u0432\u043e\u0434",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 94,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "12_1": {
+      "index": 37.36576064079891,
+      "foot_type": "\u041f\u043e\u0432\u044b\u0448\u0435\u043d\u043d\u044b\u0439 \u0441\u0432\u043e\u0434",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 125,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "12_2": {
+      "index": 31.792876218128235,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 112,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "13_1": {
+      "index": 74.49453485396752,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 79,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "13_2": {
+      "index": 64.77715082841775,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 89,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "14_1": {
+      "index": 93.75873259194931,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 72,
+        "V_HIGH": 196,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "14_2": {
+      "index": 85.090393319131,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 68,
+        "V_HIGH": 255,
+        "MIN_AREA": 0,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "15_1": {
+      "index": 30.127695731787643,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 95,
+        "V_HIGH": 255,
+        "MIN_AREA": 0,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "15_2": {
+      "index": 21.466034153014753,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 94,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 147,
+        "V_HIGH": 255,
+        "MIN_AREA": 0,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "16_1": {
+      "index": 75.57947909056159,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 83,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "16_2": {
+      "index": 24.72940174754384,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 124,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "17_1": {
+      "index": 48.110625955232,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 61,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "18_2": {
+      "index": 60.69798564852951,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 56,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "19_1": {
+      "index": 46.60438375853395,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 118,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "19_2": {
+      "index": 51.29111202194852,
+      "foot_type": "\u0423\u043f\u043b\u043e\u0449\u0435\u043d\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 107,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "1_1": {
+      "index": 29.525969882907123,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 96,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "1_2": {
+      "index": 49.64388587040504,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 101,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "20_1": {
+      "index": 32.90198802439355,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 73,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "20_2": {
+      "index": 103.66127633071602,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 51,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "21_1": {
+      "index": 25.810556059982968,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 111,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "21_2": {
+      "index": 32.50480677072139,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 78,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 79,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "22_1": {
+      "index": 43.99882462256883,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 176,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "22_2": {
+      "index": 49.442646058529945,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 170,
+        "S_LOW": 255,
+        "S_HIGH": 255,
+        "V_LOW": 126,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "23_1": {
+      "index": 29.05680569104357,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 140,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "23_2": {
+      "index": 68.48805529563208,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 121,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "24_1": {
+      "index": 25.40877326741809,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 150,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "24_2": {
+      "index": 51.91794472080493,
+      "foot_type": "\u0423\u043f\u043b\u043e\u0449\u0435\u043d\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 150,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "25_1": {
+      "index": 64.5194077734737,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 75,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 160,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "25_2": {
+      "index": 60.77651063225588,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 223,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "2_1": {
+      "index": 47.18447349109163,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 125,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "2_2": {
+      "index": 57.024276820761564,
+      "foot_type": "\u0423\u043f\u043b\u043e\u0449\u0435\u043d\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 141,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "4_1": {
+      "index": 51.93102305317652,
+      "foot_type": "\u0423\u043f\u043b\u043e\u0449\u0435\u043d\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 76,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 101,
+        "V_HIGH": 124,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "5_1": {
+      "index": 24.62845905479584,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 120,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "6_1": {
+      "index": 19.412913726527048,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 94,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "6_2": {
+      "index": 43.21271164733834,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 124,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "7_1": {
+      "index": 66.32229752271425,
+      "foot_type": "\u041f\u043b\u043e\u0441\u043a\u043e\u0441\u0442\u043e\u043f\u0438\u0435",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 69,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "7_2": {
+      "index": 45.89673823344948,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 131,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "8_1": {
+      "index": 35.83113065002908,
+      "foot_type": "\u0412\u044b\u0441\u043e\u043a\u043e\u0441\u0432\u043e\u0434\u0447\u0430\u0442\u0430\u044f (\u043f\u043e\u043b\u0430\u044f)",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 151,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "8_2": {
+      "index": 43.07526221648339,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 151,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "9_1": {
+      "index": 45.623320909306706,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 151,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    },
+    "9_2": {
+      "index": 44.68989312070179,
+      "foot_type": "\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u0430\u044f",
+      "params": {
+        "H_LOW": 0,
+        "H_HIGH": 179,
+        "S_LOW": 0,
+        "S_HIGH": 255,
+        "V_LOW": 124,
+        "V_HIGH": 255,
+        "MIN_AREA": 150000,
+        "TOE_RATIO": 0.3,
+        "HEEL_RATIO": 0.65,
+        "PERP_TOLERANCE": 10,
+        "PERP_TOLERANCE_FALLBACK": 20
+      }
+    }
+  }
+}

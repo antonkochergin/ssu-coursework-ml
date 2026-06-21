@@ -146,8 +146,6 @@ _minted-*/
 ## Файлы конфигурации просмотрщика (например, SumatraPDF)
 *.pdfsync
 # ==========================================================
-
-# Медиафайлы (исходные фото, видео)
 *.jpg
 *.JPG
 *.JPEG
@@ -157,81 +155,7 @@ _minted-*/
 *.mp4
 *.MP4
 
-# Файлы задач
-tasks.txt
 
-# ==========================================================
-# ДОПОЛНЕНИЯ ДЛЯ ВАШЕГО ПРОЕКТА
-# ==========================================================
-
-# Кэш rembg (большие файлы, не нужно в репозитории)
-cache/
-*.npy
-*.npz
-
-# Временные папки с изображениями
-original/
-split_feet/
-results_vis/
-results_vis_grayscale/
-process_best_results/
-screenshots/
-
-# Временные файлы прогресса
-progress.json
-split_progress.json
-comparison_results.json
-
-# Старые/временные результаты обучения
-best_autosave.json
-ga_grayscale_results.json
-evolution_grayscale.png
-
-# Старые скрипты (перенесены в old/)
-old/
-
-# Отчеты и примеры
-report/
-examples/
-
-# Python кэш в src
-src/__pycache__/
-src/*.pyc
-
-# Исключаем все папки с изображениями внутри src/foots
-src/foots/*/
-!src/foots/*/README.md
-
-# Кэш-файлы numpy в любых папках
-*.npy
-*.npz
-
-# ==========================================================
-# ИСКЛЮЧЕНИЯ (файлы, которые НУЖНО сохранить)
-# ==========================================================
-
-# Важные файлы, которые НЕ игнорируем
-!src/auto_analysis.py
-!src/batch_process.py
-!src/cached_functions.py
-!src/compare_results.py
-!src/ga_train_grayscale.py
-!src/interactive_grayscale.py
-!src/predict_grayscale.py
-!src/progress_grayscale.json
-!src/best_grayscale.json
-!src/requirements.txt
-!src/README.md
-!.gitignore
-
-# Не игнорируем папку с исходными фото (если они нужны для работы)
-!src/foots-for-analysis/
-!src/foots-for-analysis/*.jpg
-!src/foots-for-analysis/*.jpeg
-!src/foots-for-analysis/*.JPG
-
-# Игнорируем ВСЕ файлы в foots, кроме нужных
-src/foots/*/
-!src/foots/*/IMG_0315.jpg
-!src/foots/*/IMG_0320.jpg
-!src/foots/*/IMG_0302.jpg
+!src/foots/1/IMG_0315.jpg
+!src/foots/2/IMG_0320.jpg
+!src/foots/4/IMG_0302.jpg
